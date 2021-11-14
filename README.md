@@ -24,7 +24,7 @@
 
   - fix `nblines` to st greater than the L3 entry size(e.g. 1024 B),
 
-    increase stride until `tbad >> tgood`. `nblines*stride` at that point is the __L3 cache size__.
+    increase `stride` until `tbad >> tgood`. `nblines*stride` at that point is the __L3 cache size__.
 
   - fix `(nblines*stride)` to st. greater than the L3 cache size (e.g. 16MiB),
 
