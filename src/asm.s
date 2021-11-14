@@ -14,7 +14,7 @@ good:
     movq %rdx, %rbx
     movq %rdi, %rcx
 .inner_loop_good:
-    movb (%rbx), %al
+    movb (%rbx), %al # There is the single memory access of the function
     addq %r8, %rbx
     decq %rcx
     jnz .inner_loop_good
@@ -42,7 +42,7 @@ bad:
     movq %rdx, %rbx
     movq %rsi, %rcx
 .inner_loop_bad:
-    movb (%rbx), %al
+    movb (%rbx), %al # There is the single memory access of the function
     addq %rdi, %rbx
     decq %rcx
     jnz .inner_loop_bad
