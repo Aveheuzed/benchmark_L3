@@ -47,10 +47,10 @@ ref_bad:
     nop # movb (%rbx), %al # There is the single memory access of the function
     addq %rdi, %rbx
     decq %rcx
-jnz .inner_loop_ref_bad
+    jnz .inner_loop_ref_bad
     addq %r8, %rdx
     decq %rdi
-jnz .outer_loop_ref_bad
+    jnz .outer_loop_ref_bad
 
 .end_ref_bad:
     popq %rbx
