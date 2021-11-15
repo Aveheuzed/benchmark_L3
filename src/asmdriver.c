@@ -19,21 +19,21 @@ static inline int significative_at(size_t param) {
 
   clock_t goodtime = 0;
   goodtime += clock();
-  for (size_t i=0; i<200; i++) ref_good(param, param, buffer);
+  for (size_t i=0; i<NBRUNS; i++) ref_good(param, param, buffer);
   goodtime -= clock();
 
   goodtime -= clock();
-  for (size_t i=0; i<200; i++) good(param, param, buffer);
+  for (size_t i=0; i<NBRUNS; i++) good(param, param, buffer);
   goodtime += clock();
 
 
   clock_t badtime = 0;
   badtime += clock();
-  for (size_t i=0; i<200; i++) ref_bad(param, param, buffer);
+  for (size_t i=0; i<NBRUNS; i++) ref_bad(param, param, buffer);
   badtime -= clock();
 
   badtime -= clock();
-  for (size_t i=0; i<200; i++) bad(param, param, buffer);
+  for (size_t i=0; i<NBRUNS; i++) bad(param, param, buffer);
   badtime += clock();
 
 
