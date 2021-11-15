@@ -2,45 +2,94 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define NBRUNS 1000
+#define SIGNIFICANT_FACTOR 6
+#define NBRUNS 100
+#define MAX_SAME_CHANGES 3
 
-// this is a function, not a function pointer
-// this works fine, unlike function pointers witch caused artifacts
-typedef void (TimedF)(size_t stride, size_t len, char const* buffer);
+#define FLOOR 512L
+#define CEIL 4096L
 
-TimedF ref_good, ref_bad, good, bad;
+void ref_good(size_t stride, size_t len, char const* buffer);
+void ref_bad(size_t stride, size_t len, char const* buffer);
+void good(size_t stride, size_t len, char const* buffer);
+void bad(size_t stride, size_t len, char const* buffer);
 
-static inline clock_t timeit(TimedF kern, size_t stride, size_t len, char const* buffer) {
-  clock_t total = 0;
+static inline int significative_at(size_t param) {
+  char* buffer = malloc(param*param);
 
-  total -= clock();
-  for (int i=0; i<NBRUNS; i++){
-    kern(stride, len, buffer);
+  clock_t goodtime = 0;
+  goodtime += clock();
+  for (size_t i=0; i<200; i++) ref_good(param, param, buffer);
+  goodtime -= clock();
+
+  goodtime -= clock();
+  for (size_t i=0; i<200; i++) good(param, param, buffer);
+  goodtime += clock();
+
+
+  clock_t badtime = 0;
+  badtime += clock();
+  for (size_t i=0; i<200; i++) ref_bad(param, param, buffer);
+  badtime -= clock();
+
+  badtime -= clock();
+  for (size_t i=0; i<200; i++) bad(param, param, buffer);
+  badtime += clock();
+
+
+  free(buffer);
+  return badtime > SIGNIFICANT_FACTOR * goodtime;
+}
+
+static inline size_t dichotomy(size_t low, size_t high) {
+  // almost a plain dichotomy; we monitor the change tendency in addition.
+  // when the tendency stays, we accelerate things up by pushing the other bound
+
+  // this is implemented in order to become noise resistant!
+
+  int changes_tendency = 0; // ++ when updating low, -- when updating high
+  while (high-low > 2) {
+    size_t mid = (high+low)/2;
+    printf("Trying at %lu\n", mid);
+    if (significative_at(mid)) {
+      high = mid;
+      if (changes_tendency<=0) changes_tendency--;
+      else changes_tendency = -1;
+    }
+    else {
+      low = mid;
+      if (changes_tendency>=0) changes_tendency++;
+      else changes_tendency = +1;
+    }
+
+    if (abs(changes_tendency) > MAX_SAME_CHANGES) {
+      puts("Adjustment triggers!");
+      if (changes_tendency < 0) {
+        // push `low` away
+        low -= (high-low)/2;
+      }
+      else {
+        // push `high` away
+        high += (high-low)/2;
+      }
+      changes_tendency = 0;
+    }
   }
-  total += clock();
-  return total/NBRUNS;
+  return (low+high)/2;
 }
 
 int main(int argc, char* argv[]) {
-  if (argc != 3) exit(1);
-  const size_t stride = atoi(argv[1]);
-  const size_t len = atoi(argv[2]);
-  const size_t bufsize = stride*len;
-  char* buffer = malloc(bufsize);
+  static const char* prefixes[] = {"B", "KiB", "MiB", "GiB", "ZiB", "YiB"};
 
-  float avg_memtime_good =
-    +timeit(good, stride, len, buffer)
-    -timeit(ref_good, stride, len, buffer)
-  ;
 
-  float avg_memtime_bad =
-    +timeit(bad, stride, len, buffer)
-    -timeit(ref_bad, stride, len, buffer)
-  ;
+  float approx = dichotomy(FLOOR, CEIL);
+  approx *= approx;
 
-  avg_memtime_good *= 1000000000/CLOCKS_PER_SEC; // convert to ns
-  avg_memtime_bad *= 1000000000/CLOCKS_PER_SEC; // convert to ns
+  int i = 0;
+  while (approx > 1024) {
+    approx /= 1024;
+    i++;
+  }
 
-  printf("avg mem access time good:\t%.3f ns\n", avg_memtime_good/bufsize);
-  printf("avg mem access time bad:\t%.3f ns\n", avg_memtime_bad/bufsize);
+  printf("Estimated L3 buffer size: %.1f %s\n", approx, prefixes[i]);
 }
