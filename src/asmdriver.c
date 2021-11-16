@@ -38,7 +38,15 @@ static inline int significative_at(size_t param) {
 
 
   free(buffer);
-  return badtime > SIGNIFICANT_FACTOR * goodtime;
+
+  printf("for param %lu\n\tgood:\t%ld\n\tbad:\t%ld\n", param, goodtime, badtime);
+
+  // // this should not happen, but it does!
+  // if (goodtime < 0) return 0;
+  // if (badtime < 0) return 0;
+  //
+  // return badtime > SIGNIFICANT_FACTOR * goodtime;
+  return (badtime / goodtime) > SIGNIFICANT_FACTOR;
 }
 
 static inline size_t dichotomy(size_t low, size_t high) {
@@ -50,13 +58,14 @@ static inline size_t dichotomy(size_t low, size_t high) {
   int changes_tendency = 0; // ++ when updating low, -- when updating high
   while (high-low > 2) {
     size_t mid = (high+low)/2;
-    printf("Trying at %lu\n", mid);
     if (significative_at(mid)) {
+      puts("Value above cache size");
       high = mid;
       if (changes_tendency<=0) changes_tendency--;
       else changes_tendency = -1;
     }
     else {
+      puts("Value below cache size");
       low = mid;
       if (changes_tendency>=0) changes_tendency++;
       else changes_tendency = +1;
