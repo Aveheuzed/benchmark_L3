@@ -66,11 +66,11 @@ static inline size_t dichotomy(size_t low, size_t high) {
       puts("Adjustment triggers!");
       if (changes_tendency < 0) {
         // push `low` away
-        low -= (high-low)/2;
+        low -= (high-low);
       }
       else {
         // push `high` away
-        high += (high-low)/2;
+        high += (high-low);
       }
       changes_tendency = 0;
     }
