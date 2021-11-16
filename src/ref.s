@@ -14,7 +14,9 @@ ref_good:
     movq %rdx, %rbx
     movq %rdi, %rcx
 .inner_loop_ref_good:
-    movb (%rdx), %al # There is the single memory access of the function
+    # movb (%rdx), %al # There is the single memory access of the function
+    nop
+    nop
     lfence
     addq %r8, %rbx
     decq %rcx
@@ -43,7 +45,9 @@ ref_bad:
     movq %rdx, %rbx
     movq %rsi, %rcx
 .inner_loop_ref_bad:
-    movb (%rdx), %al # There is the single memory access of the function
+    # movb (%rdx), %al # There is the single memory access of the function
+    nop
+    nop
     lfence
     addq %rdi, %rbx
     decq %rcx

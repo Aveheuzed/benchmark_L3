@@ -2,8 +2,8 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define SIGNIFICANT_FACTOR 6
-#define NBRUNS 50
+#define SIGNIFICANT_FACTOR 1.5
+#define NBRUNS 10
 #define MAX_SAME_CHANGES 3
 
 #define FLOOR 512L
@@ -41,12 +41,7 @@ static inline int significative_at(size_t param) {
 
   printf("for param %lu\n\tgood:\t%ld\n\tbad:\t%ld\n", param, goodtime, badtime);
 
-  // // this should not happen, but it does!
-  // if (goodtime < 0) return 0;
-  // if (badtime < 0) return 0;
-  //
-  // return badtime > SIGNIFICANT_FACTOR * goodtime;
-  return (badtime / goodtime) > SIGNIFICANT_FACTOR;
+  return badtime > SIGNIFICANT_FACTOR * goodtime;
 }
 
 static inline size_t dichotomy(size_t low, size_t high) {
