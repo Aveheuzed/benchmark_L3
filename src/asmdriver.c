@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #define SIGNIFICANT_FACTOR 6
-#define NBRUNS 100
+#define NBRUNS 50
 #define MAX_SAME_CHANGES 3
 
 #define FLOOR 512L
