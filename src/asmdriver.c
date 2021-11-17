@@ -7,6 +7,7 @@
 #define NSIGMA 5
 #define PRESAMPLES 8
 #define NBRUNS 8
+#define TOOLONG(time) ((time) > CLOCKS_PER_SEC/10)
 
 void ref_good(size_t stride, size_t len, char const* buffer);
 void ref_bad(size_t stride, size_t len, char const* buffer);
@@ -74,6 +75,10 @@ static void preheat(size_t inner, size_t outer, float *const avg, float *const s
   for (int n=0; n<PRESAMPLES; n++) {
     clock_t goodtime = timing_good(inner, outer);
     clock_t badtime = timing_bad(inner, outer);
+    if (TOOLONG(goodtime) || TOOLONG(badtime)) {
+      fprintf(stderr, "I think I've gone too far without finding anything. I'm sorry…\n");
+      exit(1);
+    }
     float new = indicator(goodtime, badtime);
     sum += new;
     sumsq += new*new;
